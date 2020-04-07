@@ -1,5 +1,5 @@
 """
-    Module to get past and future global health spending data [from years 1995 - 2030 ] from the IHME into the correct
+    Module to get the past and future global health spending data [from years 1995 - 2030 ] from the IHME into the correct
     CSV format with just required columns the for Antz vizualisation
 
 """
