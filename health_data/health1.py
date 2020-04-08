@@ -147,6 +147,9 @@ def required_columns():
 
 
 def write_columns(lines, out_file="required_columns3.csv"):
+    """
+     write inputted list to csv file
+    """
     with open(out_file, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(use_column_names())

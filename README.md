@@ -9,7 +9,7 @@ All code to change styling at one go using the rows.py file under this directory
 
 Command to run: python3 rows.py
 
-Or import rows into the the Jupyter Notebook (after copying the rows.py into the same directory as the one being run)
+Or import rows into the the Jupyter Notebook (after copying the rows.py into the same directory as the one being run, along with the requisite CSV files)
 
 (can be used only with Antz software)
 
@@ -22,5 +22,14 @@ Add latitutde and logitude (geo coordinates data) from another file to make the 
 
 Command to run: python3 health.py
 
-Or import health into the Jupyter Notebook (after copying the health.py file into the same directory as the one being run)
+Or import health into the Jupyter Notebook (after copying the health.py file into the same directory as the one being run, along with the requisite CSV files)
+
+
+# Gov Data:
+
+Change aroudn the rows and columns in the csv file to match requirements
+
+Command to run: python3 gov.py
+
+Or import gov into Jupyter Notebook (after copying the gov.py file into the same directory as the one being run, along with the requisite CSV files)
 
