@@ -17,21 +17,14 @@ df = df.stack().reset_index(name='att').rename(columns={'level_4':'year'})
 # drop columns that are not needed
 del df['series_name']
 del df['series_code']
-
-# print df to a csv file for further use
-df.to_csv("clean_gov.csv")
-
-def get_rows(in_file):
-    """
-        Open csv files and return the data as a list of key:value pair dicts
-
-    """
-    with open(in_file) as csvfile:
-        rows = csv.DictReader(csvfile)
-        return list(rows)
+df['att'] = df['att'].replace('..', '0.00')
 
 
-def get_values(inlist = get_rows("clean_gov.csv")):
+d = df.to_dict(orient ="records")
+
+
+
+def get_values(inlist = list(d)):
     """
         Gets the required values from the columns 
 
@@ -50,8 +43,22 @@ def column_names():
         Column headers for the output csv file
     """
     return ['country_name', 'country_code', 'year',  'cc_per_rnk', 'ge_per_rnk', 'rq_per_rnk', 'rl_per_rnk', 'va_per_rnk']
+    
 
+def val_list(in_dict = get_values()):
+    """
+        Convert dictionary of values to a clean list for printing
+    
+        :params: dictionary of values needed
+        :return: list of joined lines for printing the csv
+    """
+    val_list = []
+    for key, value in in_dict.items():
+           line = [(",").join(key) + "," + (",").join(value)]
+           val_list.append(line)
+    return val_list
    
+
 def write_columns(lines, out_file="clean_gov_data.csv"):
     """
         Outputs the csv file in the required format 
@@ -60,14 +67,16 @@ def write_columns(lines, out_file="clean_gov_data.csv"):
 
     """
 
+   
     with open(out_file, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(column_names())
-        for key, value in lines.items():
-           writer.writerow([(",").join(key) + "," + (",").join(value)])
+        for line in lines:
+            line = (",").join(line)
+            f.write(line + "\n")
        
 def main():
-    write_columns(get_values())
+    write_columns(val_list())
 
 if __name__ == "__main__":
     main()
