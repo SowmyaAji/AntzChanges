@@ -27,9 +27,19 @@ Or import health into the Jupyter Notebook (after copying the health.py file int
 
 # Gov Data:
 
-Change aroudn the rows and columns in the csv file to match requirements
+Change around the rows and columns in the csv file to match requirements
 
 Command to run: python3 gov.py
 
 Or import gov into Jupyter Notebook (after copying the gov.py file into the same directory as the one being run, along with the requisite CSV files)
+
+# Covid Data
+
+Look through world data and work out the day-to-day growth rate per country of confirmed Covid cases
+
+Command to run: python3 covid.py
+
+Or import covid into Jupyter Notebook (after copying the covid.py file into the same directory as the one being run, along with the requisite CSV files)
+
+
 
