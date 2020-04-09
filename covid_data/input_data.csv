@@ -1,0 +1,4 @@
+index,name,lat,long,date,country_region,province_state,confirmed,death,recovered,timestamp,zdata,fatality  
+15628,Zimbabwe,-20.0,30.0,2020-04-05,Zimbabwe,0,0.0,0.0,0.0,1586044800,273.30,0.0  
+15629,Zimbabwe,-20.0,30.0,2020-04-06,Zimbabwe,0,1.0,0.0,0.0,1586131200,276.75,0.0 
+15630,Zimbabwe,-20.0,30.0,2020-04-07,Zimbabwe,0,1.0,1.0,0.0,1586217600,280.20,1.0
