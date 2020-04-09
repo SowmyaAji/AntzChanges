@@ -5,26 +5,29 @@
 """
 
 import csv
-import pandas as pd 
+import pandas as pd
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 
-df = pd.read_csv("covid_growth.csv") 
-data = df.to_dict(orient = "records")
+df = pd.read_csv("covid_growth.csv")
+data = list(df.to_dict(orient="records"))
 
 
-def conf_per_date(in_list=list(data)):
+
+def conf_per_date():
     """
-        Set the number of confirmed cases as value for each date
+        Set the number of confirmed cases as value for each date, sorted by country
 
         :params: CSV file as a list of dictionaries
         :returns: dict with the date as key and the confirmed cases as value
     """
     date_confirmed = {}
-    for row in in_list:
-        date_confirmed[row['date']] = row['confirmed']
-
+    for row in data:
+        #     date_confirmed[row['name']] = {row['date']:row['confirmed']}
+        date_confirmed.setdefault(row['name'], []).append(
+            {row['date']: row['confirmed']})
     return date_confirmed
+
 
 
 def previous_date(date):
@@ -42,7 +45,40 @@ def previous_date(date):
     return str(previous_date.date())
 
 
-def growth_rate(in_list=list(data)):
+def get_conf_tup(prev_date_row, prev_date, conf_today):
+    """
+        Creates a tuple of previous and current day confirmed cases
+
+        :params: row from the conf_dict for a country, with confirmed cases for each date for it as values
+        :returns: tuple containing previous confirmed cases and current confirmed case
+    """
+
+    for line in prev_date_row:
+        if prev_date in line:
+            prev_conf = line[prev_date]
+            return (prev_conf, conf_today)
+
+
+def prev_confirmed():
+    """
+    Get the previous date confirmed figures
+
+    :params: none
+    :returns: list of tuples of confirmed cases in the previous date and current date
+    """
+    conf_dict = conf_per_date()
+    conf_list = []
+    for row in data:
+        if row['name'] in conf_dict:
+            conf_today = row['confirmed']
+            prev_date = previous_date(row['date'])
+            prev_conf = get_conf_tup(
+                conf_dict[row["name"]], prev_date, conf_today)
+            conf_list.append(prev_conf)
+    return conf_list
+
+
+def growth_rate(conf_list=prev_confirmed()):
     """
         Get the day to day growth rate of confirmed cases as a list
 
@@ -51,19 +87,16 @@ def growth_rate(in_list=list(data)):
     """
     growth_rate = []
     daily_growth = 0
-    for row in in_list:
-        conf_today = row['confirmed']
-        prev_date = previous_date(row['date'])
-        conf_dict = conf_per_date()
-        if prev_date in conf_dict:
-            prev_conf = conf_dict.get(prev_date)
-            if prev_conf == '' or conf_today == '':
-                daily_growth = 0.00
-            elif float(prev_conf) == 0:
-                daily_growth = float(conf_today) * 100
-            else:
-                daily_growth = ((float(conf_today) - float(prev_conf)) / float(prev_conf)) * 100
-            growth_rate.append(str(daily_growth))
+    for tup in conf_list:
+        if tup is None or tup[0] == '' or tup[1] == '':
+            daily_growth = 0.00
+        elif float(tup[0]) == 0:
+            daily_growth = float(tup[1]) * 100
+        else:
+            daily_growth = (
+                (float(tup[1]) - float(tup[0])) / float(tup[0])) * 100
+        growth_rate.append(str(round(daily_growth, 2)))
+    # print(growth_rate[45:60])
     return growth_rate
 
 
@@ -73,11 +106,11 @@ def send_to_file(in_list = growth_rate()):
 
         :params: the growth_rate list
         :returns: prints to csv file
-    
+
     """
     with open('growth_list.csv', 'w') as f:
         for line in in_list:
-            f.write(line + ",")
+            f.write(line + "\n")
 
 
 def main():
