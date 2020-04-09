@@ -13,7 +13,6 @@ df = pd.read_csv("covid_growth.csv")
 data = list(df.to_dict(orient="records"))
 
 
-
 def conf_per_date():
     """
         Set the number of confirmed cases as value for each date, sorted by country
@@ -23,11 +22,9 @@ def conf_per_date():
     """
     date_confirmed = {}
     for row in data:
-        #     date_confirmed[row['name']] = {row['date']:row['confirmed']}
-        date_confirmed.setdefault(row['name'], []).append(
+        date_confirmed.setdefault((row['name'], row['province_state']), []).append(
             {row['date']: row['confirmed']})
     return date_confirmed
-
 
 
 def previous_date(date):
@@ -69,11 +66,11 @@ def prev_confirmed():
     conf_dict = conf_per_date()
     conf_list = []
     for row in data:
-        if row['name'] in conf_dict:
+        if (row['name'], row['province_state']) in conf_dict.keys():
             conf_today = row['confirmed']
             prev_date = previous_date(row['date'])
             prev_conf = get_conf_tup(
-                conf_dict[row["name"]], prev_date, conf_today)
+                conf_dict[(row["name"], row['province_state'])], prev_date, conf_today)
             conf_list.append(prev_conf)
     return conf_list
 
@@ -100,7 +97,7 @@ def growth_rate(conf_list=prev_confirmed()):
     return growth_rate
 
 
-def send_to_file(in_list = growth_rate()):
+def send_to_file(in_list=growth_rate()):
     """
         Get the growth rate list in a file
 
@@ -114,7 +111,7 @@ def send_to_file(in_list = growth_rate()):
 
 
 def main():
-   send_to_file()
+    send_to_file()
 
 
 if __name__ == "__main__":
