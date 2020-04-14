@@ -42,4 +42,13 @@ Command to run: python3 covid.py
 Or import covid into Jupyter Notebook (after copying the covid.py file into the same directory as the one being run, along with the requisite CSV files)
 
 
+# Shipping Data:
+
+Get specific rows limited by latitude\longitude and year from the shipping_data gzip file.
+
+Command to run: python3 shipping.py
+
+Or import covid into Jupyter Notebook (after copying the shipping.py file into the same directory as the one being run, along with the requisite gzip files)
+
+
 
