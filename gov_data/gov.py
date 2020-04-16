@@ -4,7 +4,7 @@ Module to change around row and column data from a csv file
 
 """
 
-import pandas as pd 
+import pandas as pd
 import csv
 
 df = pd.read_csv("gov_data.csv") 
@@ -20,6 +20,7 @@ del df['series_code']
 
 # clean the .. in the columns
 df['att'] = df['att'].replace('..', '0.00')
+
 
 # turn the dataframe into dict
 d = df.to_dict(orient ="records")

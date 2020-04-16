@@ -31,6 +31,7 @@ def add_lat_long(health_data):
     for line in lat_long:
         country_dict[line['Country']] = {
             'latitude': line['Latitude'], 'longitude': line['Longitude']}
+    
     # add Country dict key value pairs to the input data file
     country_coords = []
 

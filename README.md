@@ -48,7 +48,7 @@ Get specific rows limited by latitude\longitude and year from the shipping_data 
 
 Command to run: python3 shipping.py
 
-Or import covid into Jupyter Notebook (after copying the shipping.py file into the same directory as the one being run, along with the requisite gzip files)
+Or import covid into Jupyter Notebook (after copying the shipping.py file into the same directory as the one being run, along with the requisite gzip filesexicd)
 
 
 
