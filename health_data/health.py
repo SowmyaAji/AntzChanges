@@ -1,5 +1,6 @@
 """
-    Module to get the past and future global health spending data [from years 1995 - 2030 ] from the IHME into the correct
+    Module to get the past and future global health spending
+    data [from years 1995 - 2030 ] from the IHME into the correct
     CSV format with just required columns the for Antz vizualisation
 
 """
@@ -19,7 +20,7 @@ def get_rows(in_file):
 
 def add_lat_long(health_data):
     """
-        Attaches the latitude and logitude columns 
+        Attaches the latitude and logitude columns
         to each row of the input file
 
         params: takes the input data file as a list of dicts
@@ -27,11 +28,12 @@ def add_lat_long(health_data):
     """
     lat_long = get_rows("capitals.csv")
     country_dict = {}
-    # set Country as the key in country dict and pass each country from lat_long to it
+    # set Country as the key in country dict and pass
+    #  each country from lat_long to it
     for line in lat_long:
         country_dict[line['Country']] = {
             'latitude': line['Latitude'], 'longitude': line['Longitude']}
-    
+
     # add Country dict key value pairs to the input data file
     country_coords = []
 
@@ -47,17 +49,15 @@ def get_column_values(inlist, column_names):
         Scan the input list and pull out just the columns that are needed
 
         params: input list, the required column names
-        returns: dict of each country with all the required column values as a list of values
+        returns: dict of each country with all the required
+        column values as a list of values
 
     """
     required_columns = {}
-    # to remove all years in the input data beyond 2030.
-    # Needed to be a tuple of strings as the input values are strings not numbers
-    years = ('2031', '2032', '2033', '2034', '2035', '2036',
-             '2037', '2038', '2039', '2040', '2041', '2042', '2043',
-             '2044', '2045', '2046', '2047', '2048', '2049', '2050')
     for row in inlist:
-        if row['year'] not in years:
+        year = row['year']
+        # ensure data is limited to year below 2030
+        if int(year) not in (range(2031, 2051)):
             required_columns.setdefault(row['location_name'], []).append(
                 [(row[key]) if row[key] else '0' for key in column_names])
     return required_columns
@@ -65,7 +65,8 @@ def get_column_values(inlist, column_names):
 
 def use_column_names():
     """
-        List of column names to be used for final CSV as well as to check against the health_futures csv file
+        List of column names to be used for final
+         CSV as well as to check against the health_futures csv file
 
     """
     return ['location_id',
@@ -118,29 +119,30 @@ def old_column_names():
 
 def required_columns(data1, data2):
     """
-        Gets and sorts the two data sets and adds them together in the format needed to print
+        Gets and sorts the two data sets and adds them together
+         in the format needed to print
 
         params: both data sets are inputted as lists of dictionaries
         returns: values from both input files as a list
 
     """
-    
 
     item1 = get_column_values(add_lat_long(data1), old_column_names())
     item2 = get_column_values(add_lat_long(data2), use_column_names())
-    # double nested loop getting each line for each country as individual lines for the output list
+    # getting each country as individual lines for the output list
     lines1 = [entry for country in item1.values() for entry in country]
     lines2 = [entry for country in item2.values() for entry in country]
     lines = lines1 + lines2
     # sorted using location_name as the key
-    return sorted(lines, key=lambda x: x[1])
+    return sorted(lines, key=lambda x: (x[1], x[3]))
 
 
 def write_columns(lines, out_file="health_data.csv"):
     """
-        Outputs the csv file in the required format 
+        Outputs the csv file in the required format
 
-        params: gets the data that needs to be outputted as a list and sets a default out_file
+        params: gets the data that needs to be outputted
+         as a list and sets a default out_file
 
     """
 
@@ -154,7 +156,8 @@ def main():
     """
         Calls the entire program
     """
-    # Both input data files are read from the specific lines in the existing files where the country names begin.
+    # Both input data files are read from the specific lines
+    #  in the existing files where the country names begin.
     # These could change depending on the input file.
     write_columns(required_columns(get_rows("fin_retro.csv")[
                   254:], get_rows("health_future.csv")[410:]))
