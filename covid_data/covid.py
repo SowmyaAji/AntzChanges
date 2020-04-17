@@ -1,6 +1,7 @@
 """
 
-    Module to check for increase in the number of covid cases from the previous day
+    Module to check for increase in the number of covid cases
+    from the previous day
 
 """
 
@@ -15,14 +16,16 @@ data = list(df.to_dict(orient="records"))
 
 def conf_per_date():
     """
-        Set the number of confirmed cases as value for each date, sorted by country
+        Set the number of confirmed cases as value for
+         each date, sorted by country
 
         :params: CSV file as a list of dictionaries
         :returns: dict with the date as key and the confirmed cases as value
     """
     date_confirmed = {}
     for row in data:
-        date_confirmed.setdefault((row['name'], row['province_state']), []).append(
+        date_confirmed.setdefault((row['name'],
+                                   row['province_state']), []).append(
             {row['date']: row['confirmed']})
     return date_confirmed
 
@@ -46,8 +49,10 @@ def get_conf_tup(prev_date_row, prev_date, conf_today):
     """
         Creates a tuple of previous and current day confirmed cases
 
-        :params: row from the conf_dict for a country, with confirmed cases for each date for it as values
-        :returns: tuple containing previous confirmed cases and current confirmed case
+        :params: row from the conf_dict for a country,
+         with confirmed cases for each date for it as values
+        :returns: tuple containing previous confirmed
+         cases and current confirmed case
     """
 
     for line in prev_date_row:
@@ -61,7 +66,8 @@ def prev_confirmed():
     Get the previous date confirmed figures
 
     :params: none
-    :returns: list of tuples of confirmed cases in the previous date and current date
+    :returns: list of tuples of confirmed cases
+     in the previous date and current date
     """
     conf_dict = conf_per_date()
     conf_list = []
@@ -70,7 +76,8 @@ def prev_confirmed():
             conf_today = row['confirmed']
             prev_date = previous_date(row['date'])
             prev_conf = get_conf_tup(
-                conf_dict[(row["name"], row['province_state'])], prev_date, conf_today)
+                conf_dict[(row["name"], row['province_state'])],
+                prev_date, conf_today)
             conf_list.append(prev_conf)
     return conf_list
 
