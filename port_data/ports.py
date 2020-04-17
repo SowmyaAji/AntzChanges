@@ -7,93 +7,149 @@
 import pandas as pd
 import numpy as np
 
-# read csv file
-df = pd.read_csv("PortProfiles.csv")
 
-# change column names to be attached to each other with _, for use
-df.columns = ['cargo_type', 'port_id', 'port_name', 'year',
-              'trade_type', 'units', 'percent_change', 'volume']
+def read_csv(infile="PortProfiles.csv"):
+    """
+    Read csv file as a pandas df
 
-# replace blank strings with NaN
-df = df.replace(r'^\s+$', np.nan, regex=True)
+    :param: input csv file
+    :returns: df
+    """
+    # read csv file
+    df = pd.read_csv(infile)
+    return df
 
-# drop unnecessary rows
-df = df[df.cargo_type != 'TOP 5 COMMODITIES']
-df = df[df.cargo_type != 'TOP 5 FOOD/FARM COMMODITIES']
 
-# create column cp_type
-df['cp_type'] = df['cargo_type'] + " " + df['trade_type']
+def clean_df(df=read_csv()):
+    """
+    Cleans df to match requirements
 
-# fix discrepancies in column 'volume'
-df['volume'] = df['volume'].astype(str)
-df['volume'] = df['volume'].str.replace(',', "")
-df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
-df['volume'] = df['volume'].fillna(0.0)
+    :params: input df
+    :returns: cleaned df
+    """
 
-# dict of latitude and longitude for each port
-port_lat_long = {'Port of Valdez':
-                 {'latitude': '61.10361111', 'longitude': '-146.3570671'},
-                 'Port of Portland':
-                 {'latitude': '43.65333333', 'longitude': '-70.23951708'},
-                 'Port of Ketchikan':
-                 {'latitude': '55.34694444', 'longitude': '-131.6712603'},
-                 'Port of Tacoma':
-                 {'latitude': '47.26722222', 'longitude': '-122.4042403'},
-                 'Port of Juneau':
-                 {'latitude': '58.37916667', 'longitude': '-134.6700236'},
-                 'Port of Longview':
-                 {'latitude': '46.11277778', 'longitude': '-122.96702'},
-                 'Port of Anchorage':
-                 {'latitude': '61.23555556', 'longitude': '-149.8877503'},
-                 'Port of Long Beach':
-                 {'latitude': '33.74888889', 'longitude': '-118.2007067'},
-                 'Port of Oakland':
-                 {'latitude': '37.79944444', 'longitude': '-122.3012367'},
-                 'Port of Los Angeles':
-                 {'latitude': '33.73194444', 'longitude': '-118.2597173'},
-                 'Port of Honolulu':
-                 {'latitude': '21.30944444', 'longitude': '-157.8737338'},
-                 'Port of Seattle':
-                 {'latitude': '47.60222222', 'longitude': '-122.3597173'}}
+    # change column names to be attached to each other with _, for use
+    df.columns = ['cargo_type', 'port_id', 'port_name', 'year',
+                  'trade_type', 'units', 'percent_change', 'volume']
 
-# turn dataframe into dict to add latitude and longitude
-d = list(df.to_dict(orient="records"))
+    # replace blank strings with NaN
+    df = df.replace(r'^\s+$', np.nan, regex=True)
 
-# add lat lon columns to each row in df and return it as a list of dicts
-dl = []
-for row in d:
-    if row['port_name'] in port_lat_long:
-        row.update(port_lat_long[row['port_name']])
-    dl.append(row)
+    # drop unnecessary rows
+    df = df[df.cargo_type != 'TOP 5 COMMODITIES']
+    df = df[df.cargo_type != 'TOP 5 FOOD/FARM COMMODITIES']
 
-# convert dict list back into a dataframe
-data = pd.DataFrame.from_dict(dl)
+    # create column cp_type
+    df['cp_type'] = df['cargo_type'] + " " + df['trade_type']
 
-# pivot the table using cp_type as columns, the volume as value
-#  and all other columns as index
+    # fix discrepancies in column 'volume'
+    df['volume'] = df['volume'].astype(str)
+    df['volume'] = df['volume'].str.replace(',', "")
+    df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
+    df['volume'] = df['volume'].fillna(0.0)
 
-pivoted = pd.pivot_table(data, index=['port_id', 'port_name',
-                                      'latitude', 'longitude',
-                                      'year', 'units', 'percent_change'],
-                         values="volume", columns='cp_type').reset_index()
+    # to check this df, uncomment line below:
+    # print(df.head())
+    return df
 
-# rename columns of pivoted dataframe to suit the naming convention needed
-pivoted.columns = ['port_id', 'port_name', 'latitude',
-                   'longitude', 'year', 'units',
-                   'percent_change', 'cp_domestic',
-                   'cp_empty', 'cp_exports',
-                   'cp_imports', 'cp_restow', 'cp_total',
-                   'cp_transhipment', 'cu_empty',
-                   'cu_exports', 'cu_imports', 'cu_total',
-                   'db_domestic', 'db_exports', 'db_foreign',
-                   'db_imports', 'db_total', 'tt_domestic',
-                   'tt_exports', 'tt_foreign', 'tt_imports',
-                   'tt_total', 'vc_container',
-                   'vc_dry_bulk', 'vc_dry_bulk_barge',
-                   'vc_other_freight', 'vc_other_freight_barge']
 
-# print(len(pivoted))
-# print(pivoted.head())
+def port_lat_long(infile="ne_50m_ports.csv", df=clean_df()):
+    """
+    Gets latitude and longitude coordinates for US ports
 
-# print to csv file
-pivoted.to_csv("ports.csv", index=False)
+    :params: input csv file, df
+    :returns: dict with port as key and lat, lon as values
+    """
+    # truncate port name for comparison with lat_long csv file (below)
+    short = [name[8:] for name in df['port_name']]
+    port_lat_long = {}
+    with open(infile, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            words = line.split(",")
+            if words[4] in short:
+                port_lat_long["Port of " + words[4]] = {
+                    'latitude': words[1], 'longitude': words[0]}
+        # to check this dict, uncomment line below:
+        # print(port_lat_long)
+        return port_lat_long
+
+
+def add_lat_long(df=clean_df(), port_lat_long=port_lat_long()):
+    """
+    Add latitude and longitude to each port row
+
+    :params: df, lat_lon dict
+    :returns: df with added columns
+    """
+    # turn dataframe into dict to add latitude and longitude
+    d = list(df.to_dict(orient="records"))
+
+    # add lat lon columns to each row in df and return it as a list of dicts
+    dl = []
+    for row in d:
+        if row['port_name'] in port_lat_long:
+            row.update(port_lat_long[row['port_name']])
+        dl.append(row)
+
+    # convert dict list back into a dataframe
+    data = pd.DataFrame.from_dict(dl)
+    return data
+
+
+def pivot_data(data=add_lat_long()):
+    """
+    Pivots the rows of cargo and trade types to columns
+
+    :params: df with required columns
+    :returns: pivoted df
+    """
+    # pivot the table using cp_type as columns, the volume as value
+    #  and all other columns as index
+    pivoted = pd.pivot_table(data, index=['port_id', 'port_name',
+                                          'latitude', 'longitude',
+                                          'year', 'units', 'percent_change'],
+                             values="volume", columns='cp_type').reset_index()
+
+    # rename columns of pivoted dataframe to suit the naming convention needed
+    pivoted.columns = ['port_id', 'port_name', 'latitude',
+                       'longitude', 'year', 'units',
+                       'percent_change', 'cp_domestic',
+                       'cp_empty', 'cp_exports',
+                       'cp_imports', 'cp_restow', 'cp_total',
+                       'cp_transhipment', 'cu_empty',
+                       'cu_exports', 'cu_imports', 'cu_total',
+                       'db_domestic', 'db_exports', 'db_foreign',
+                       'db_imports', 'db_total', 'tt_domestic',
+                       'tt_exports', 'tt_foreign', 'tt_imports',
+                       'tt_total', 'vc_container',
+                       'vc_dry_bulk', 'vc_dry_bulk_barge',
+                       'vc_other_freight', 'vc_other_freight_barge']
+
+    # to check this df, uncomment line below:
+    # print(len(pivoted))
+    # print(pivoted.head())
+    return pivoted
+
+
+def write_csv(pivoted=pivot_data()):
+    """
+    Prints out df to csv in required format
+
+    :params: input pivoted df
+    :returns: prints to csv, no return value
+    """
+    # print to csv file
+    pivoted = pivoted.replace(np.nan, '0.0', regex=True)
+    pivoted.to_csv("ports.csv", index=False)
+
+
+def main():
+    """
+    Main function to run the script
+    """
+    write_csv()
+
+
+if __name__ == "__main__":
+    main()
